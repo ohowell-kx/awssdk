@@ -1,0 +1,46 @@
+context:
+  version: "0.0.1"
+
+package:
+  name: q-kx-aws-sdk
+  version: ${{ version }}
+
+source:
+  path: ..
+  filter:
+    exclude:
+      - recipe/**
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - ${{ compiler("cxx") }}
+    - cmake
+    - if: unix
+      then:
+        - make
+    - aws-sdk-cpp
+  host:
+    - aws-sdk-cpp
+  run: 
+    - aws-sdk-cpp
+
+tests:
+  - script:
+    - if: linux and x86_64
+      then:
+        - test -f ${PREFIX}/lib/q/mod/kx/awssdk.li64.so
+    - if: linux and aarch64
+      then:
+        - test -f ${PREFIX}/lib/q/mod/kx/awssdk.la64.so
+    - if: osx and arm64
+      then:
+        - test -f ${PREFIX}/lib/q/mod/kx/awssdk.ma64.so
+    - if: osx and x86_64
+      then:
+        - test -f ${PREFIX}/lib/q/mod/kx/awssdk.mi64.so
+    - if: win
+      then:
+        - if not exist %PREFIX%\\lib\\q\\mod\\kx\\\awssdk.wi64.dll exit 1
