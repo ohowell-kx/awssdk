@@ -189,7 +189,7 @@ Fetches AWS credentials using the official AWS authentication chain.
 | `secretKey` | string | AWS secret access key. |
 | `sessionToken` | string | Session token. Empty for long-lived credentials. |
 | `accountId` | string | AWS account ID. Empty if the provider does not supply one. |
-| `expiration` | long | Expiry as milliseconds since the Unix epoch. |
+| `expiration` | long | Expiry as milliseconds since the Unix epoch. Credentials that do not expire report `9223372036854`, the largest value a millisecond timestamp can hold. |
 
 **Errors**
 
@@ -197,14 +197,20 @@ Fetches AWS credentials using the official AWS authentication chain.
 | --- | --- |
 | `'uninitialized` | `initialize` has not been called. |
 
+A chain that resolves nothing is not an error. If no credentials can be found, the
+call still succeeds and returns the same five keys with every string empty, so check
+the result rather than relying on a signal:
+
 ```q
 q)aws.initialize[]
 1b
 q)credentials: aws.getCredentials[]
 q)key credentials
 `accessKey`secretKey`sessionToken`accountId`expiration
+q)count credentials`accessKey        / no credentials configured
+0
 q)1970.01.01D00 + 1000000j * credentials`expiration
-2026.09.07D18:42:11.000000000
+2262.04.11D23:47:16.854000000
 ```
 
 Credentials are not cached, so every call resolves the chain again and returns fresh
